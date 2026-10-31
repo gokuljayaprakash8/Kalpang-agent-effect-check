@@ -1,75 +1,53 @@
-# Kalpang-agent-effect-check
+# KALPANG Agent Effect Check
 
-# Agent Effect Check
+**Did your agent's real-world effect stay inside what it was allowed to do? I check, and I give you the test to rerun.**
 
-**An independent, evidence-based check of whether an AI agent's actions stayed within its authorization.**
+Most agent testing asks whether an attacker can trick the model. This asks something different: after the agent acted, did anything happen beyond what was authorized?
 
-Agent Effect Check assesses one AI-agent workflow and one authorized action through four controlled scenarios. The goal is to identify observable mismatches between what was authorized and what the workflow actually did.
+A check that reads only the one thing the agent was supposed to change can pass while the agent also did something else. In my own live experiment (EB004), the authorized issue matched exactly, so a check of that issue alone would have passed. A scan of everything inside the declared boundary found one extra issue nobody had authorized. [Details](https://github.com/gokuljayaprakash8/kalpang-observer)
 
 ## What you get
 
-For one workflow, I run four scenarios:
+1. **A rerunnable test** (a GitHub Actions workflow and scripts) for your workflow, so you can run it again whenever you change the agent.
+2. **A short written report:** what was authorized, what was observed, a verdict per scenario, and what the check could not see.
+3. **Evidence:** raw logs, API responses, IDs, timestamps and hashes.
 
-1. **Normal run:** The authorized action occurs, with no additional unauthorized effect observed.
-2. **Extra effect:** An additional, unapproved action appears.
-3. **No authority:** An action occurs without valid authorization behind it.
-4. **Widened delegation:** Delegated authority exceeds what its parent authorization permits.
+## Four scenarios
 
-The engagement includes:
+1. **Normal run:** the authorized action happens and nothing else.
+2. **Extra effect:** an additional, unapproved action appears.
+3. **No authority:** an action happens without valid authorization behind it.
+4. **Widened delegation:** delegated authority exceeds what its parent allowed.
 
-- A written report describing the setup, observations, verdicts, and limitations.
-- A reproducible repository your team can use to rerun the test.
-- Evidence supporting the reported results.
-- A plain-language account of what the assessment does and does not establish.
+If a scenario does not apply to your setup (for example, there is no parent-child delegation), the report says "not applicable". It never claims a pass.
 
-Verdicts apply to the tested scenarios and observed evidence. They are not a guarantee that other unauthorized effects cannot occur.
+## Pilot
 
-## Pilot offer
+**Introductory price: $300 per workflow, for the first three teams.** Delivery within five working days after scope, access and test setup are agreed.
 
-**Price: $300 per workflow**
-
-Scope: I accept workflows where the effect can be read back through an API and the workflow can run in a CI job or sandbox I access through a repo you share. I confirm the scope in writing before any payment.
-
-**Delivery: within five working days**, once the scope and required access or materials have been agreed.
-
-The pilot covers one defined workflow and one authorized action, evaluated against the four scenarios above. Any additional workflows or materially expanded scope are agreed separately.
+Scope: one workflow, one authorized action, with effects readable through an API. The workflow runs in CI or in a sandbox, mock or containerized repo you share. No production access is needed. My observer uses its own short-lived, read-only credential, deleted after the engagement. Scope is confirmed in writing before any payment.
 
 ## Who this is for
 
-Teams developing AI agents that can create or modify issues, open pull requests, write files, call tools, or trigger other external actions.
+Teams building agents that act on GitHub first: coding agents and bots that create or change issues, pull requests or files.
 
-The central question is: **did the observed actions remain within the authority granted to the agent?**
+## Evidence so far
 
-## Sample results
+- [EB005 results](https://github.com/gokuljayaprakash8/kalpang-observer/blob/main/EB005_RESULTS.md): a valid chain was admitted and the observer still flagged an unapproved effect; a widened chain was refused.
+- [aat-vectors](https://github.com/gokuljayaprakash8/aat-vectors): 43 test vectors and an independent checker for delegation rules.
 
-Read the example report: [EB005: Results and limitations](https://github.com/gokuljayaprakash8/kalpang-observer/blob/main/EB005_RESULTS.md)
+## What is true today
 
-The report documents a real experiment and its limitations. Read it as evidence from a bounded demonstration, not as proof of comprehensive security.
-
-## Method and limitations
-
-This work is developed with substantial assistance from large language models. Claims in reports are tied to reproducible test results wherever applicable.
-
-My earlier demonstration used a scripted workflow in place of an LLM agent, with real effects on GitHub (real issues, created by a real workflow). The executor, the gateway and the observer ran under one GitHub account, so it did not establish a separate trust domain between the tested system and the observer.
-
-A reproducible demonstration gives useful evidence about a defined test. It does not by itself show that a system is secure under real-world conditions.
-
-Agent Effect Check is:
-
-- Not a penetration test.
-- Not a comprehensive security audit.
-- Not a formal verification or certification service.
-- Not a guarantee that an AI agent cannot produce unauthorized effects.
-- Not a replacement for your existing security controls.
-
-Results are limited to the tested workflow, scenarios, instrumentation, and available evidence.
+- Built with substantial LLM assistance. Every result is a run you can repeat, so you do not have to trust me or the model.
+- My public demos use a scripted workflow, not an LLM agent, and ran under one GitHub account. They show the method. They do not show a separate trust domain.
+- "Independent" here means done by someone outside your dev team, with a separate read-only identity. It is not independent of GitHub itself.
+- Not a penetration test, a full security audit, a certification, or a guarantee. Results cover only the tested workflow, scenarios and evidence.
 
 ## Authorization and scope
 
-Testing is performed only on systems you own or have explicitly authorized me in writing to test. Before work begins, we agree on the workflow, permitted actions, test environment, scope, and evidence required. I do not test a third party's system without permission.
+I test only systems you own or have authorized me in writing to test.
 
 ## Contact
 
 **Gokul Jayaprakash**
-
 Email: gokuljayaprakashnair@gmail.com
