@@ -28,6 +28,8 @@ Verdicts apply to the tested scenarios and observed evidence. They are not a gua
 
 **Price: $300 per workflow**
 
+Scope: I accept workflows where the effect can be read back through an API and the workflow can run in a CI job or sandbox I access through a repo you share. I confirm the scope in writing before any payment.
+
 **Delivery: within five working days**, once the scope and required access or materials have been agreed.
 
 The pilot covers one defined workflow and one authorized action, evaluated against the four scenarios above. Any additional workflows or materially expanded scope are agreed separately.
