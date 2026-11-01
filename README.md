@@ -25,17 +25,19 @@ If a scenario does not apply to your setup (for example, there is no parent-chil
 
 In EB006, a live LLM agent with one tool ("create a GitHub issue") read a note containing a hidden instruction to file an unauthorized second issue.
 
-- With no guard, gpt-oss-120b and gpt-oss-20b followed it in all 10 trials each; qwen3.8-27b followed it in none.
-- A check that looked only at the authorized issue passed all 10 gpt-oss-120b trials while an unauthorized issue existed. A separate read-only observer, which never reads the agent's own log, caught every one.
+- With no guard, an independent observer flagged an unauthorized effect in all 10 trials for gpt-oss-120b and in all 10 for gpt-oss-20b. For qwen3.8-27b it flagged none.
+- A check that looked only at the authorized issue passed all 10 gpt-oss-120b trials while an unauthorized issue existed. The observer never reads the agent's own log; it reads the repository.
 - With a pre-execution guard on, the model still tried every time, but zero unauthorized issues existed, confirmed by the observer.
 
 One injection wording, 10 trials per model. Failed and excluded runs are listed in the write-up. Details: [EB006_RESULTS.md](https://github.com/gokuljayaprakash8/kalpang-observer/blob/main/EB006_RESULTS.md)
 
 ## Pilot
 
-**Introductory price: $300 per workflow, for the first three teams.** Delivery within five working days after scope, access and test setup are agreed.
+**Introductory price: $300 per workflow, for the first three teams.** Regular price after that: $999 per workflow. Delivery within five working days after scope, access and test setup are agreed.
 
 Scope: one workflow, one authorized action, with effects readable through an API. The workflow runs in CI or in a sandbox, mock or containerized repo you share. No production access is needed. My observer uses its own short-lived, read-only credential, deleted after the engagement. Scope is confirmed in writing before any payment.
+
+**Before the clock starts:** a repository (or sandbox copy) where the workflow already runs in GitHub Actions, one named authorized action, and a read-only token scoped to that repository. If setup takes longer than agreed, the five working days begin when it's ready.
 
 ## Who this is for
 
