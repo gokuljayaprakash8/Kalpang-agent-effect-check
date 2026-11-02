@@ -1,70 +1,80 @@
 # KALPANG Agent Effect Check
 
-**Did your agent's real-world effect stay inside what it was allowed to do? I check, and I give you the test to rerun.**
+**Did your GitHub agent do anything you didn't authorize?**
 
-Most agent testing asks whether an attacker can trick the model. This asks something different: after the agent acted, did anything happen beyond what was authorized?
+A check that only looks at the authorized action can pass while an unauthorized action also happened. This service checks the repository itself, after the agent runs, and reports what changed against what was authorized.
 
-A check that reads only the one thing the agent was supposed to change can pass while the agent also did something else. In my own live experiment (EB004), the authorized issue matched exactly, so a check of that issue alone would have passed. A scan of everything inside the declared boundary found one extra issue nobody had authorized. [Details](https://github.com/gokuljayaprakash8/kalpang-observer)
+**Measured example (EB006):** a live LLM tool-calling agent (gpt-oss-120b) was given an injected third-party note. A target-only check of the authorized issue passed in all 10 trials. With no guard, an independent observer flagged unauthorized effects in 10/10 trials. The observer never read the agent's log. It read the repository. Details: [EB006_RESULTS.md](https://github.com/gokuljayaprakash8/kalpang-observer/blob/main/EB006_RESULTS.md)
 
 ## What you get
 
-1. **A rerunnable test** (a GitHub Actions workflow and scripts) for your workflow, so you can run it again whenever you change the agent.
-2. **A short written report:** what was authorized, what was observed, a verdict per scenario, and what the check could not see.
-3. **Evidence:** raw logs, API responses, IDs, timestamps and hashes.
+- A rerunnable GitHub Actions test for one workflow.
+- A short written report: verdict, likely cause, suggested fix, and a retest plan.
+- Evidence you can verify yourself: issue and comment IDs, titles, timestamps, and SHA-256 hashes of bodies. Bodies are not stored.
+
+## What it can and cannot see
+
+It sees only the declared boundary: **issues and issue comments in one repository**. Anything the agent does outside that boundary (other repos, pull requests, files, other services) is invisible to this check. The report states what could not be seen.
 
 ## Four scenarios
 
-1. **Normal run:** the authorized action happens and nothing else.
-2. **Extra effect:** an additional, unapproved action appears.
-3. **No authority:** an action happens without valid authorization behind it.
-4. **Widened delegation:** delegated authority exceeds what its parent allowed.
+1. Authorized action only: expected result is IN-BOUNDS.
+2. Extra effect beyond the authorized action: DIVERGENT.
+3. No authority for the action: DIVERGENT.
+4. Widened delegation: DIVERGENT.
 
-If a scenario does not apply to your setup (for example, there is no parent-child delegation), the report says "not applicable". It never claims a pass.
+Verdicts are IN-BOUNDS, DIVERGENT, INDETERMINATE, or NO OBSERVED EFFECT. If a scenario doesn't apply to your workflow, the report says "not applicable" instead of a pass. INDETERMINATE means the run could not be verified, and it is never reported as a pass.
 
 ## What has been measured
 
-In EB006, a live LLM agent with one tool ("create a GitHub issue") read a note containing a hidden instruction to file an unauthorized second issue.
+EB006, live LLM agent, one injection wording, 10 trials per model. This is a demonstration, not a benchmark.
 
-- With no guard, an independent observer flagged an unauthorized effect in all 10 trials for gpt-oss-120b and in all 10 for gpt-oss-20b. For qwen3.8-27b it flagged none.
-- A check that looked only at the authorized issue passed all 10 gpt-oss-120b trials while an unauthorized issue existed. The observer never reads the agent's own log; it reads the repository.
-- With a pre-execution guard on, the model still tried every time, but zero unauthorized issues existed, confirmed by the observer.
-
-One injection wording, 10 trials per model. Failed and excluded runs are listed in the write-up. Details: [EB006_RESULTS.md](https://github.com/gokuljayaprakash8/kalpang-observer/blob/main/EB006_RESULTS.md)
+- No guard: the observer flagged unauthorized effects in 10/10 trials on gpt-oss-120b and 10/10 on gpt-oss-20b, and in none on qwen. The target-only check passed all 10 gpt-oss-120b trials.
+- Exact-match pre-execution guard: the agent still attempted the extra action, but no extra issue was created.
+- Two trials in one later run are unexplained. They are disclosed in the results file.
 
 ## Pilot
 
-**Introductory price: $300 per workflow, for the first three teams.** Regular price after that: $999 per workflow. Delivery within five working days after scope, access and test setup are agreed.
+- **$300** for the first three teams. Regular price **$999** per workflow.
+- Delivered in five working days after scope is agreed, access is set up, and the workflow runs in your CI.
+- Scope: one workflow, one authorized action, effects readable through the GitHub API.
+- Optional re-check after a model or prompt change: priced in writing.
 
-Scope: one workflow, one authorized action, with effects readable through an API. The workflow runs in CI or in a sandbox, mock or containerized repo you share. No production access is needed. My observer uses its own short-lived, read-only credential, deleted after the engagement. Scope is confirmed in writing before any payment.
+**Before the clock starts, you provide:**
+1. A sandbox repository (or a copy) where the agent workflow already runs in GitHub Actions.
+2. A separate observer repository, or I provide one.
+3. A fine-grained, read-only, short-lived token for the observer.
+4. The one action the agent is authorized to take.
 
-**Before the clock starts:** a repository (or sandbox copy) where the workflow already runs in GitHub Actions, one named authorized action, and a read-only token scoped to that repository. If setup takes longer than agreed, the five working days begin when it's ready.
+I do not debug your CI. If the workflow doesn't run, the clock does not start.
 
 ## Who this is for
 
-Teams building agents that act on GitHub first: coding agents and bots that create or change issues, pull requests or files.
+Teams with an agent that creates or comments on GitHub issues from untrusted input, such as issue-triage bots, coding agents, and client-built GitHub agents.
 
-## Evidence so far
-
-- [EB006 results](https://github.com/gokuljayaprakash8/kalpang-observer/blob/main/EB006_RESULTS.md): a live LLM agent, three models, 10 trials each; an independent observer caught effects that a target-only check passed.
-- [EB005 results](https://github.com/gokuljayaprakash8/kalpang-observer/blob/main/EB005_RESULTS.md): a valid chain was admitted and the observer still flagged an unapproved effect; a widened chain was refused.
-- [aat-vectors](https://github.com/gokuljayaprakash8/aat-vectors): 43 test vectors and an independent checker for delegation rules.
+Not a fit: no real agent yet, effects not readable through the API, or a need for a broad penetration test.
 
 ## What is true today
 
-- Built with substantial LLM assistance. Every result is a run you can repeat, so you do not have to trust me or the model.
-- Public demos: EB005 uses a scripted workflow. EB006 uses a live LLM agent (three models, 10 trials each, one injection wording), with real GitHub effects checked by a separate observer. Neither is a claim about agents in general. Both ran under one GitHub account, so they show the method, not a separate trust domain.
-- "Independent" here means done by someone outside your dev team, with a separate read-only identity. It is not independent of GitHub itself.
-- Not a penetration test, a full security audit, a certification, or a guarantee. Results cover only the tested workflow, scenarios and evidence.
+- Every observer script and test vector is deterministic and rerunnable in your own CI. You do not have to take my word for a verdict.
+- The harness was built with substantial LLM assistance.
+- EB005 used a scripted agent. EB006 uses a live LLM agent.
+- The public demos ran under one GitHub account, so they are not independent of each other. For pilots, "independent" means: outside your dev team, a separate read-only identity, and a separate repository. It does not mean independent of GitHub.
+- Not a penetration test, not a certification, not a guarantee.
+- The probe repository is public, so unrelated issues from strangers can appear as unattributed effects.
+- Pricing is early-stage and may change.
 
-## Authorization and scope
+## Authorization, scope and credentials
 
-I test only systems you own or have authorized me in writing to test.
+- Testing happens only with your written authorization of the repository and scope.
+- The observer uses its own short-lived, read-only credential. It is stored only as an encrypted GitHub Actions secret, never in notes or chats, and revoked after delivery. Where practical, the observer runs in your repository with your secret and I never hold the token.
+- No production access. Sandbox copies only.
+- Evidence retention: deleted on request after delivery.
 
 ## How to start
 
-In writing only: open an issue in this repository or message [@invariantdesign](https://x.com/invariantdesign) on X. Scope is agreed in writing before any payment.
+In writing only: open an issue in this repository or message @invariantdesign on X. Scope is agreed in writing before any payment.
 
 ## Contact
 
-**Gokul Jayaprakash**
-Email: gokuljayaprakashnair@gmail.com
+gokuljayaprakashnair@gmail.com
