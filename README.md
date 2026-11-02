@@ -76,6 +76,14 @@ Setup support is limited to confirming that the agreed workflow runs. I do not p
 - No production access. Sandbox copies only.
 - Evidence retention: deleted on request after delivery.
 
+## After you message me
+
+1. You describe the agent workflow and the one authorized action.
+2. I confirm whether the effect is observable through the GitHub API.
+3. We agree the repository, scenarios, and access model in writing.
+4. You create the read-only observer token and store it as a GitHub Actions secret.
+5. The five-working-day delivery window begins.
+
 ## What is true today
 
 - Every observer script and test vector is deterministic and rerunnable in your own CI. You do not have to take my word for a verdict.
