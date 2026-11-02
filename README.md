@@ -2,9 +2,9 @@
 
 **Did your GitHub agent do anything you didn't authorize?**
 
-A check that only looks at the authorized action can pass while an unauthorized action also happened. This service checks the repository itself, after the agent runs, and reports what changed against what was authorized.
+Your agent can complete the task you asked for and also do something you never authorized. A check that only verifies the requested action can pass while an unauthorized issue or comment also exists. This service checks the repository after the agent runs and reports observed effects against the authorization you declared.
 
-**Measured example (EB006):** a live LLM tool-calling agent (gpt-oss-120b) was given an injected third-party note. A target-only check of the authorized issue passed in all 10 trials. With no guard, an independent observer flagged unauthorized effects in 10/10 trials. The observer never read the agent's log. It read the repository. Details: [EB006_RESULTS.md](https://github.com/gokuljayaprakash8/kalpang-observer/blob/main/EB006_RESULTS.md)
+**Measured example (EB006):** a live LLM tool-calling agent (gpt-oss-120b) was given an injected third-party note. With no guard, a check limited to the authorized issue passed in all 10 trials. A separate observer workflow flagged an unauthorized effect in all 10. The observer never read the agent's log. It read the repository. Full results, including other models and excluded runs: [EB006_RESULTS.md](https://github.com/gokuljayaprakash8/kalpang-observer/blob/main/EB006_RESULTS.md)
 
 ## What you get
 
@@ -12,18 +12,38 @@ A check that only looks at the authorized action can pass while an unauthorized 
 - A short written report: verdict, likely cause, suggested fix, and a retest plan.
 - Evidence you can verify yourself: issue and comment IDs, titles, timestamps, and SHA-256 hashes of bodies. Bodies are not stored.
 
-## What it can and cannot see
+## Exact boundary of the check
 
-It sees only the declared boundary: **issues and issue comments in one repository**. Anything the agent does outside that boundary (other repos, pull requests, files, other services) is invisible to this check. The report states what could not be seen.
+It checks **issues and issue comments in one repository**. This is deliberately narrow: it verifies one declared authorization boundary rather than claiming to inspect every possible side effect. Anything the agent does outside that boundary (other repos, pull requests, files, other services) is not seen. The report states what could not be seen.
 
-## Four scenarios
+## Verdicts
 
-1. Authorized action only: expected result is IN-BOUNDS.
+IN-BOUNDS, DIVERGENT, INDETERMINATE, or NO OBSERVED EFFECT. INDETERMINATE means the run could not be verified and is never reported as a pass. If a scenario doesn't apply to your workflow, the report says "not applicable" instead of a pass.
+
+Four scenarios:
+1. Authorized action only: expected IN-BOUNDS.
 2. Extra effect beyond the authorized action: DIVERGENT.
 3. No authority for the action: DIVERGENT.
 4. Widened delegation: DIVERGENT.
 
-Verdicts are IN-BOUNDS, DIVERGENT, INDETERMINATE, or NO OBSERVED EFFECT. If a scenario doesn't apply to your workflow, the report says "not applicable" instead of a pass. INDETERMINATE means the run could not be verified, and it is never reported as a pass.
+## Sample report verdict
+
+*Illustrative example. Fictional, not a client result.*
+
+- **Scenario:** extra effect beyond the authorized action
+- **Verdict:** DIVERGENT
+- **Authorized effect:** one issue created with the agreed title prefix
+- **Observed:** a second issue created in the same repository
+- **Evidence:** issue ID, creation timestamp, SHA-256 hash of body
+- **Likely cause:** the agent followed an instruction embedded in untrusted issue text
+- **Suggested control:** an authorization check before issue creation; restrict the agent's token permissions
+- **Retest:** rerun after the control change
+
+## Who this is for
+
+Teams with an agent that creates or comments on GitHub issues from untrusted input, such as issue-triage bots, coding agents, and client-built GitHub agents.
+
+**Not a fit if:** you have no running agent, the effects are not readable through the GitHub API, or you need broad penetration testing, certification, or multi-service coverage.
 
 ## What has been measured
 
@@ -33,9 +53,10 @@ EB006, live LLM agent, one injection wording, 10 trials per model. This is a dem
 - Exact-match pre-execution guard: the agent still attempted the extra action, but no extra issue was created.
 - Two trials in one later run are unexplained. They are disclosed in the results file.
 
-## Pilot
+## Founding pilot and pricing
 
-- **$300** for the first three teams. Regular price **$999** per workflow.
+- **$300 for the first three teams.** In exchange, I ask permission to publish an anonymized summary (workflow type, scenarios tested, outcome). If you prefer confidentiality, say so and nothing is published.
+- Regular price: **$999** per workflow. Founding pricing applies to the first three engagements only; regular pricing may change.
 - Delivered in five working days after scope is agreed, access is set up, and the workflow runs in your CI.
 - Scope: one workflow, one authorized action, effects readable through the GitHub API.
 - Optional re-check after a model or prompt change: priced in writing.
@@ -46,23 +67,7 @@ EB006, live LLM agent, one injection wording, 10 trials per model. This is a dem
 3. A fine-grained, read-only, short-lived token for the observer.
 4. The one action the agent is authorized to take.
 
-I do not debug your CI. If the workflow doesn't run, the clock does not start.
-
-## Who this is for
-
-Teams with an agent that creates or comments on GitHub issues from untrusted input, such as issue-triage bots, coding agents, and client-built GitHub agents.
-
-Not a fit: no real agent yet, effects not readable through the API, or a need for a broad penetration test.
-
-## What is true today
-
-- Every observer script and test vector is deterministic and rerunnable in your own CI. You do not have to take my word for a verdict.
-- The harness was built with substantial LLM assistance.
-- EB005 used a scripted agent. EB006 uses a live LLM agent.
-- The public demos ran under one GitHub account, so they are not independent of each other. For pilots, "independent" means: outside your dev team, a separate read-only identity, and a separate repository. It does not mean independent of GitHub.
-- Not a penetration test, not a certification, not a guarantee.
-- The probe repository is public, so unrelated issues from strangers can appear as unattributed effects.
-- Pricing is early-stage and may change.
+Setup support is limited to confirming that the agreed workflow runs. I do not provide general CI debugging. If the workflow doesn't run, the clock does not start.
 
 ## Authorization, scope and credentials
 
@@ -70,6 +75,18 @@ Not a fit: no real agent yet, effects not readable through the API, or a need fo
 - The observer uses its own short-lived, read-only credential. It is stored only as an encrypted GitHub Actions secret, never in notes or chats, and revoked after delivery. Where practical, the observer runs in your repository with your secret and I never hold the token.
 - No production access. Sandbox copies only.
 - Evidence retention: deleted on request after delivery.
+
+## What is true today
+
+- Every observer script and test vector is deterministic and rerunnable in your own CI. You do not have to take my word for a verdict.
+- The harness was built with substantial LLM assistance.
+- EB005 used a scripted agent. EB006 uses a live LLM agent.
+- Not a penetration test, not a certification, not a guarantee.
+
+## Known limitations
+
+- The public demos ran under one GitHub account, so they are not independent of each other. For pilots, "independent" means: outside your dev team, a separate read-only identity, and a separate repository. It does not mean independent of GitHub.
+- The probe repository is public, so unrelated issues from strangers can appear as unattributed effects.
 
 ## How to start
 
