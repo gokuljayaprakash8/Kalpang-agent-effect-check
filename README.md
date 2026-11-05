@@ -97,11 +97,12 @@ Setup support is limited to confirming that the agreed workflow runs. I do not p
 - The public demos ran under one GitHub account, so they are not independent of each other. For pilots, "independent" means: outside your dev team, a separate read-only identity, and a separate repository. It does not mean independent of GitHub.
 - In the public EB006 setup, unrelated issues from strangers could appear as unattributed effects.
 - The observer must start, and finish its baseline snapshot, before the run it observes. Otherwise it reports INDETERMINATE.
-- EB006: three models and three wordings. EB007: one model, one action, five trials per row.
+- A before/after snapshot can miss an issue or comment that is created and deleted between the two snapshots. A change seen during a run is reported as observed; attributing it to the agent needs the run's timing and, where available, event evidence.
+- EB006: three models and three wordings. EB007: one model, one action, five trials per row. The action's name is withheld, so EB007 itself can't be re-run from this page. The observer and method work on any action.
 
 ## How to start
 
-In writing only: open an issue in this repository or message @invariantdesign on X. Scope is agreed in writing before any payment.
+In writing only: email gokuljayaprakashnair@gmail.com or message @invariantdesign on X. Please don't post workflow details or repository names in a public issue. Scope is agreed in writing before any payment.
 
 ## Contact
 
